@@ -8,14 +8,24 @@
 
         <style>
             body {
-                margin: 40px 0 0 0;
+                margin: 10px auto 0;
                 padding: 0;
                 background-color: #EEE;
                 text-align: center;
             }
+            #game-container{
+                display: flex;
+                flex: 1;
+                flex-direction: row-reverse;
+                justify-content: center;
+            }
+            .points{
+                margin: 10%;
+                font-size: 2em;
+            }
             #game-canvas {
-                width: 1000px;
-                height: 500px;
+                width: 800px;
+                height: 600px;
                 border: 2px solid black;
                 image-rendering: pixelated;
                 image-rendering: crisp-edges;
@@ -34,11 +44,10 @@
     </head>
     <body>
         <div id="game-container">
-            <canvas id="game-canvas"></canvas>
+            <div class="points">Pontos: 0</div>
+            <canvas id="game-canvas" width="50" height="50"></canvas>
         </div>
-
     </div>
-
         <script src="game.js"></script>
     </body>
 </html>
