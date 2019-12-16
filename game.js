@@ -14,43 +14,18 @@ function playerRender() {
     context.fillStyle = '#050505'
     context.globalAlpha = 1
     context.fillRect(game.player.x, game.player.y, game.player.width, game.player.heigth)
-    if (game.move == 'top') {
-        for (i = 1; i <= game.player.points; i++) {
-            context.fillStyle = '#050505'
-            context.globalAlpha = 0.3
-            context.fillRect(game.player.x, game.player.y + i, game.player.width, game.player.heigth)
-        }
-    } else {
-        if (game.move == 'botton') {
-            for (i = 1; i <= game.player.points; i++) {
-                context.fillStyle = '#050505'
-                context.globalAlpha = 0.3
-                context.fillRect(game.player.x, game.player.y - i, game.player.width, game.player.heigth)
-            }
-        } else {
-            if (game.move == 'rigth') {
-                for (i = 1; i <= game.player.points; i++) {
-                    context.fillStyle = '#050505'
-                    context.globalAlpha = 0.3
-                    context.fillRect(game.player.x - i, game.player.y, game.player.width, game.player.heigth)
-                }
-            } else {
-                if (game.move == 'left') {
-                    for (i = 1; i <= game.player.points; i++) {
-                        context.fillStyle = '#050505'
-                        context.globalAlpha = 0.3
-                        context.fillRect(game.player.x + i, game.player.y, game.player.width, game.player.heigth)
-                    }
-                }
-            }
-        }
+    
+    for(let i = 0; i < game.player.tail.length; i++){
+        context.fillStyle = '#050505'
+        context.globalAlpha = 0.3
+        context.fillRect(game.player.tail[i].x, game.player.tail[i].y, game.player.width, game.player.heigth)
     }
+
     if (game.fruit !== null) {
         context.fillStyle = 'green'
         context.globalAlpha = 1
         context.fillRect(game.fruit.x, game.fruit.y, game.player.width, game.player.heigth)
     }
-    document.querySelector(".points").innerHTML = 'Pontos:' + game.player.points
     requestAnimationFrame(playerRender)
 }
 
@@ -58,15 +33,20 @@ function playerRender() {
 function init() {
     game = {
         player: {
-            x: 25,
-            y: 25,
+            x: 15,
+            y: 15,
             points: 0,
+            tail: [],
             width: 1,
             heigth: 1
         },
-        time: 1000,
+        time: 200,
         move: 'rigth',
+        moved: '',
         fruit: null
+    }
+    if(screen.width < 768){
+        document.querySelector('#control').classList.remove('some')
     }
     playerRender(game.move)
     document.addEventListener('keydown', handleKeydown)
@@ -74,34 +54,88 @@ function init() {
 }
 function handleKeydown(e) {
     const keyPress = e.key
-    console.log(keyPress)
 
-    if (keyPress === 'ArrowDown') {
+    if (keyPress === 'ArrowDown'  && game.moved !== 'top') {
         game.move = 'botton'
+        if(game.player.points > 0){
+            game.moved = game.move
+        }
     }
-    if (keyPress === 'ArrowLeft') {
+    if (keyPress === 'ArrowLeft'  && game.moved !== 'rigth') {
         game.move = 'left'
+        if(game.player.points > 0){
+            game.moved = game.move
+        }
     }
-    if (keyPress === 'ArrowRight') {
+    if (keyPress === 'ArrowRight' && game.moved !== 'left') {
         game.move = 'rigth'
+        if(game.player.points > 0){
+            game.moved = game.move
+        }
     }
-    if (keyPress === 'ArrowUp') {
+    if (keyPress === 'ArrowUp' && game.moved !== 'botton') {
         game.move = 'top'
+        if(game.player.points > 0){
+            game.moved = game.move
+        }
     }
 }
 function movePlayer() {
-    if (game.move === 'botton' && game.player.y + 1 < gameCanvas.height) {
-        game.player.y = game.player.y + 1
+
+    if (game.fruit != null) {
+        if (game.player.x === game.fruit.x && game.player.y === game.fruit.y) {
+            game.fruit = null
+            game.player.points++
+            document.querySelector(".points").innerHTML = 'Pontos:' + game.player.points
+            game.player.tail.push({x: game.player.x, y: game.player.y})
+        }
     }
-    if (game.move === 'left' && game.player.x - 1 >= 0) {
-        game.player.x = game.player.x - 1
+
+    if(game.player.tail.length > 0){
+        game.player.tail[game.player.tail.length] = {x: game.player.x, y: game.player.y}
     }
-    if (game.move === 'rigth' && game.player.x + 1 < gameCanvas.width) {
-        game.player.x = game.player.x + 1
+
+    while(game.player.tail.length > game.player.points){
+        game.player.tail.shift()
+    }   
+
+    if (game.move === 'botton' && game.moved !== 'top') {
+        if(game.player.y + 1 < gameCanvas.height){
+            game.player.y = game.player.y + 1
+        }else{
+            game.player.y = 0
+        }
     }
-    if (game.move === 'top' && game.player.y - 1 >= 0) {
-        game.player.y = game.player.y - 1
+    if (game.move === 'left' && game.moved !== 'rigth') {
+        if(game.player.x - 1 >= 0){
+            game.player.x = game.player.x - 1
+        }else{
+            game.player.x = gameCanvas.width
+        }
     }
+    if (game.move === 'rigth' && game.moved !== 'left') {
+        if( game.player.x + 1 < gameCanvas.width){
+            game.player.x = game.player.x + 1
+        }else{
+            game.player.x = 0
+        }
+    }
+    if (game.move === 'top' && game.moved !== 'botton') {
+        if(game.player.y - 1 >= 0){
+            game.player.y = game.player.y - 1
+        }else{
+            game.player.y = gameCanvas.height
+        }
+    }
+
+    for(let i = 0; i < game.player.tail.length; i++){
+        if(game.player.tail[i].x == game.player.x && game.player.y == game.player.tail[i].y){
+            clearInterval(game.loop)
+            document.querySelector(".points").innerHTML = 'Game Over: ' + game.player.points + ' pontos'
+            document.getElementById('play').classList.remove('some')
+        }
+    }
+
     let random = Math.floor(Math.random() * (3 - 0)) + 0
     let random2 = Math.floor(Math.random() * (3 - 0)) + 0
 
@@ -111,13 +145,4 @@ function movePlayer() {
             y: Math.floor(Math.random() * (gameCanvas.height - 0)) + 0
         }
     }
-
-    if (game.fruit != null) {
-        if (game.player.x === game.fruit.x && game.player.y === game.fruit.y) {
-            game.fruit = null
-            game.player.points++
-        }
-    }
 }
-
-main()
